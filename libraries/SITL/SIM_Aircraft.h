@@ -30,6 +30,8 @@
 #include "SIM_Precland.h"
 #include <Filter/Filter.h>
 
+#include <string>
+
 namespace SITL {
 
 /*
@@ -102,6 +104,11 @@ public:
     }
 
     float gross_mass() const { return mass + external_payload_mass; }
+
+    virtual void set_config(const std::string &config) {
+        config_ = config;
+    }
+
 
     const Location &get_location() const { return location; }
 
@@ -178,6 +185,7 @@ protected:
     const char *frame;
     bool use_time_sync = true;
     float last_speedup = -1.0f;
+    std::string config_ = "";
 
     // allow for AHRS_ORIENTATION
     AP_Int8 *ahrs_orientation;
