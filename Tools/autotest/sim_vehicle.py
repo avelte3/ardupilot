@@ -752,6 +752,7 @@ parser.add_option("-v", "--vehicle",
                   default=None,
                   help="vehicle type (%s)" % vehicle_options_string,
                   choices=list(vinfo.options.keys()))
+parser.add_option("", "--params", type='string', default=None, help="override default parameter file")
 parser.add_option("-f", "--frame", type='string', default=None, help="""set vehicle frame type
 
 %s""" % (generate_frame_help()))
