@@ -26,9 +26,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
-#include <string>
 #include <iostream>
-#include <vector>
 #include <algorithm>
 
 #include <sys/types.h>
@@ -48,14 +46,14 @@ Scrimmage::Scrimmage(const char *home_str, const char *_frame_str) :
     frame_str(_frame_str)
 {
     // Set defaults for scrimmage-copter
-    if (std::string(frame_str) == "scrimmage-copter") {
+    if (strcmp(frame_str,"scrimmage-copter")== 0) {
         mission_name_ = "arducopter.xml";
         motion_model_ = "Multirotor";
         visual_model_ = "iris";
     }
 }
 
-void Scrimmage::set_config(const std::string &config)
+void Scrimmage::set_config(const char *config)
 {
     fdm_port = 5504 + instance*10;
     printf("ArduPilot sending to scrimmage on port: %d\n", fdm_port);
@@ -74,42 +72,30 @@ void Scrimmage::set_config(const std::string &config)
     // pairs
 
     // First iterate over comma-separated strings
-    std::stringstream comma_ss(config);
-    std::string comma_str;
-    while (getline(comma_ss, comma_str, ',')) {
-        // Parse the key=value strings
-        std::vector<std::string> tokens;
-        std::stringstream kv_ss(comma_str);
-        std::string intermediate;
-        while (getline(kv_ss, intermediate, '=')) {
-            tokens.push_back(intermediate);
+    char *end_str;
+    char* copy_config = strdup(config);
+    char *token = strtok_r(copy_config, ",", &end_str);
+    while (token != NULL)
+    {
+        char *end_token;
+        char *token2 = strtok_r(token, "=", &end_token);
+        if (strcmp(token2, "mission")==0){
+            mission_name_ = strtok_r(NULL, "=", &end_token);
+            printf("saved mission: %s",mission_name_);
+        } else if (strcmp(token2, "motion_model")==0){
+            motion_model_ = strtok_r(NULL, "=", &end_token);
+            printf("saved motion model: %s",motion_model_);
+        } else if (strcmp(token2, "visual_model")==0){
+            visual_model_ = strtok_r(NULL, "=", &end_token);
+            printf("saved visual model: %s",visual_model_);
+        } else if (strcmp(token2, "terrain")==0){
+            terrain_ = strtok_r(NULL, "=", &end_token);
+            printf("saved terrain: %s",terrain_);
+        } else {
+            printf("Invalid scrimmage param: %s", token2);
         }
-
-        // If the key:value was parsed correctly, add it to the config map
-        if (tokens.size() == 2) {
-            configs_[tokens[0]] = tokens[1];
-        }
-    }
-
-    // Were any of the defaults overwritten?
-    auto it_mission = configs_.find("mission");
-    if (it_mission != configs_.end()) {
-        mission_name_ = it_mission->second;
-    }
-
-    auto it_motion = configs_.find("motion_model");
-    if (it_motion != configs_.end()) {
-        motion_model_ = it_motion->second;
-    }
-
-    auto it_visual = configs_.find("visual_model");
-    if (it_visual != configs_.end()) {
-        visual_model_ = it_visual->second;
-    }
-
-    auto it_terrain = configs_.find("terrain");
-    if (it_terrain != configs_.end()) {
-        terrain_ = it_terrain->second;
+        printf("\n");
+        token = strtok_r(NULL, ",", &end_str);
     }
 
     // start scrimmage after parsing simulation configuration
@@ -125,24 +111,13 @@ void Scrimmage::start_scrimmage(void)
 
         // Construct the scrimmage command string with overrides for initial
         // position and heading.
-        std::string full_exec_str = "'scrimmage " + mission_name_
-            + " -o \""
-            + "latitude_origin=" + std::to_string(home.lat / 1.0e7f) + ","
-            + "longitude_origin=" + std::to_string(home.lng / 1.0e7f) + ","
-            + "altitude_origin=" + std::to_string(home.alt / 1.0e2f) + ","
-            + "heading=" + std::to_string(home_yaw) + ","
-            + "motion_model=" + motion_model_ + ","
-            + "visual_model=" + visual_model_ + ","
-            + "terrain=" + terrain_ + ","
-            + "to_ardupilot_port=" + std::to_string(fdm_port+1) + ","
-            + "from_ardupilot_port=" + std::to_string(fdm_port)
-            + "\"'";
+        char full_exec_str[512] = "";
+        sprintf(full_exec_str, "xterm +hold -T SCRIMMAGE -e 'scrimmage %s -o \"latitude_origin=%f,longitude_origin=%f,altitude_origin=%f,heading=%f,motion_model=%s,visual_model=%s,terrain=%s,to_ardupilot_port=%d,from_ardupilot_port=%d\"'",mission_name_, home.lat*1.0e-7f, home.lng*1.0e-7f, home.alt*1.0e-2f, home_yaw, motion_model_, visual_model_, terrain_,fdm_port+1,fdm_port);
 
-        std::cout << full_exec_str.c_str() << std::endl;
+        printf("%s\n", full_exec_str);
 
         // system call worked
-        full_exec_str = "xterm +hold -T SCRIMMAGE -e " + full_exec_str;
-        int ret = system(full_exec_str.c_str());
+        int ret = system(full_exec_str);
 
         if (ret != 0) {
             std::cerr << "scrimmage didn't open.\n";
