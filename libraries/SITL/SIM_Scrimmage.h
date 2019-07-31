@@ -35,14 +35,14 @@ public:
     Scrimmage(const char *home_str, const char *frame_str);
 
     /* update model by one time step */
-    void update(const struct sitl_input &input);
+    void update(const struct sitl_input &input) override;
 
     /* static object creator */
     static Aircraft *create(const char *home_str, const char *frame_str) {
         return new Scrimmage(home_str, frame_str);
     }
 
-    void set_config(const std::string &config) override;
+    void set_config(const char *config) override;
 
 private:
     uint16_t fdm_port;
@@ -78,16 +78,15 @@ private:
     SocketAPM recv_sock;
     SocketAPM send_sock;
 
-    std::string frame_str;
-    std::map<std::string, std::string> configs_;
+    const char *frame_str;
 
     double home_yaw_deg_ = 0;
 
     // Use ArduPlane by default
-    std::string mission_name_ = "arduplane.xml";
-    std::string motion_model_ = "JSBSimControl";
-    std::string visual_model_ = "zephyr-blue";
-    std::string terrain_ = "mcmillan";
+    const char *mission_name_ = "arduplane.xml";
+    const char *motion_model_ = "JSBSimControl";
+    const char *visual_model_ = "zephyr-blue";
+    const char *terrain_ = "mcmillan";
 };
 
 } // namespace SITL
