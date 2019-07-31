@@ -168,7 +168,7 @@ void SITL_State::_parse_command_line(int argc, char * const argv[])
     _use_fg_view = true;
     char *autotest_dir = nullptr;
     _fg_address = "127.0.0.1";
-    std::string config = "";
+    const char* config = "";
 
     const int BASE_PORT = 5760;
     const int RCIN_PORT = 5501;
@@ -251,7 +251,7 @@ void SITL_State::_parse_command_line(int argc, char * const argv[])
     setvbuf(stdout, (char *)0, _IONBF, 0);
     setvbuf(stderr, (char *)0, _IONBF, 0);
 
-    GetOptLong gopt(argc, argv, "hwus:r:CI:P:SO:M:F:x:",
+    GetOptLong gopt(argc, argv, "hwus:r:CI:P:SO:M:F:c:",
                     options);
 
     while ((opt = gopt.getoption()) != -1) {
