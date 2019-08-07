@@ -1,0 +1,12 @@
+{
+    "vehicles":{"ArduCopter":{"frame": "scrimmage-copter",
+                  "instances": 4},
+                "ArduPlane":{"frame": "scrimmage-plane",
+                 "instances" : 0}
+               },
+    "origin":"34.458281,-84.180209,450,130",
+    "pattern":{"name":"line",
+               "separation":2.0,
+               "direction":"east"}
+    
+}

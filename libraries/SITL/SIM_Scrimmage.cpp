@@ -92,7 +92,7 @@ void Scrimmage::set_config(const char *config)
     free(copy_config);
 
     // start scrimmage after parsing simulation configuration
-    start_scrimmage();
+    // start_scrimmage();
 }
 
 // Start Scrimmage child
